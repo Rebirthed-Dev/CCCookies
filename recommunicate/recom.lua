@@ -50,8 +50,6 @@ recommunicate.openIdentityFromDisk = function()
         end
     end
 
-    print(identity)
-    print(name)
     return identity, name
 end
 
@@ -62,7 +60,6 @@ recommunicate.formatDisk = function(username)
 
     local files = fs.list(drivePath)
     for i = 1, #files do
-        print(files[i])
         fs.delete(files[i])
     end
 
@@ -120,7 +117,6 @@ recommunicate.listenToServerLoop = function(connection, messageFunction)
 end
 
 recommunicate.createProtocol = function(identity, name)
-    print(identity, name)
     return identity:Protocol {
         -- Programs will only see packets sent on the same protocol.
         -- Only one active listener can exist at any time for a given protocol name.

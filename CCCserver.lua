@@ -1,5 +1,7 @@
 local comms = require "recommunicate"
 
+local db = require "restore"
+
 print("This lua file is for testing. This will format the drive in the disk drive for use with Cookie Clicker.")
 
 --comms.format("testingUser")
@@ -16,10 +18,25 @@ local daemon = comms.getDaemon()
 
 local protocol = comms.createProtocol(identity, "Cookie")
 
+db.init()
+
 local onMessage = function(communicationID, address, messageRecieved)
-    print("got " .. messageRecieved .. " from a user, sending ACK")
+    local cookies = nil
+    print("got " .. messageRecieved .. " from a user, checking cookies, incrementing by 1, and sending current count")
     print()
-    comms.serverSendToID(communicationID, "ACK")
+    if db.checkIfPlayerDatabaseExists(address) == true then
+        cookies = db.queryPlayerDatabase(address, "Cookies")
+    else
+        cookies = 0
+        db.createPlayerDatabase(address)
+    end
+    if cookies ~= nil then
+        print("cookies not nil")
+        cookies = cookies + 1
+        comms.serverSendToID(communicationID, "Current Cookie count: " .. cookies)
+        print("message sent")
+        db.updateDatabase(address, "Cookies", cookies)
+    end
 end
 
 local ServerLoopWrapper = function()

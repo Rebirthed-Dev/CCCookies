@@ -21,7 +21,6 @@ function module.initialise()
 end
 
 function module.createProtocol(identity, name)
-    print(identity)
     return mainModule.createProtocol(identity, name)
 end
 

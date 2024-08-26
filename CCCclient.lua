@@ -31,7 +31,7 @@ end
 local clientLoop = function()
     while true do
         if handshake == true then
-            write("Enter message to send to server: ")
+            write("Press Enter to ask server to increment database cookies by 1... ")
             local messageToSend = read()
             handshake = false
             serverConnection:send(messageToSend)
