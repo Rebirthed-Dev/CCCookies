@@ -2,7 +2,7 @@ local module = {}
 local encryptnet = require "ecnet2"
 local mainModule = require "recommunicate.recom"
 
--- OPEN ENDER MODEM HERE - DEFAULT "TOP"
+-- OPEN ENDER MODEM HERE - DEFAULT "BACK"
 encryptnet.open("back")
 
 local encryptnet = require "ecnet2"

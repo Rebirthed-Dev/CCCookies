@@ -8,6 +8,9 @@ DATABASE_PLAYER_FILES = "/db/playerData"
 MAIN = nil -- The main database is immutable and cannot be modified. It will only be loaded, never saved, sometimes backed up, but can only be edited by hand.
 -- Consider the main db as a configuration file for holding settings that can be considered always true and never corrupted.
 
+-- A client will need a place to store options. For this purpose, a hardcoded PlayerData is used.
+-- yeah this technically inflates file sizes but i'm not rewriting all of the DB system to accomodate option persistence
+
 local TEMPLATE = {
     ["Cookies"] = 0,
     ["Upgrades"] = {},
@@ -17,7 +20,8 @@ local TEMPLATE = {
     ["Stats"] = {
         ["LifetimeCookies"] = 0,
         ["AccountCreated"] = 0
-    }
+    },
+    ["LastUpdate"] = 0,
 }
 
 local MAIN_TEMPLATE = {
@@ -36,10 +40,14 @@ restore.init = function()
 end
 
 -- Generally before sending main module a filepath, add a "/" to the start.
-restore.createPlayerDatabase = function(name)
+restore.createPlayerDatabase = function(name, template)
+    local tempToUse = TEMPLATE
+    if template ~= nil then
+        tempToUse = template
+    end
     local filepath = restore.generatePlayerFilePath(name)
     local backupPath = restore.generateBackupFilePath(name)
-    return db.createDatabaseFile(filepath, backupPath, TEMPLATE)
+    return db.createDatabaseFile(filepath, backupPath, tempToUse)
 end
 
 restore.queryAllPlayerData = function(name)
@@ -140,7 +148,7 @@ restore.generatePlayerFilePath = function(name)
 end
 
 restore.generateBackupFilePath = function(name)
-    return DATABASE_BACKUP_PATH .. "/" .. name .. "_" .. os.epoch() -- timestamps files by milliseconds since world creation
+    return DATABASE_BACKUP_PATH .. "/" .. name .. "_" .. os.epoch("utc") -- timestamps files by milliseconds since world creation
 end
 
 restore.checkIfPlayerDatabaseExists = function(name)

@@ -1,0 +1,44 @@
+{
+  {
+    {
+      "\x20\x20\x20\x80\x80\x20\x20\x20",
+      "00000000",
+      "fffccfff",
+    },
+    {
+      "\x20\x97\x83\x83\x83\x83\x94\x20",
+      "0ffccf90",
+      "f99999ff",
+    },
+    {
+      "\x20\x95\x95\x80\x80\x95\x95\x20",
+      "0fc009c0",
+      "fc999cff",
+    },
+    {
+      "\x20\x8a\x95\x80\x80\x95\x85\x20",
+      "0cf009c0",
+      "ff999fff",
+    },
+    {
+      "\x20\x20\x95\x9f\x90\x95\x20\x20",
+      "00fbfb00",
+      "ffbfbfff",
+    },
+    {
+      "\x20\x20\x95\x95\x95\x95\x20\x20",
+      "00fbfb00",
+      "ffbfbfff",
+    },
+    {
+      "\x20\x20\x8a\x85\x8a\x85\x20\x80",
+      "00888800",
+      "ffffffff",
+    },
+  },
+  version = "1.0.0",
+  creator = "prototuipe",
+  width = 8,
+  height = 7,
+  animated = false,
+}

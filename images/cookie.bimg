@@ -1,0 +1,69 @@
+{
+  {
+    {
+      "\x20\x20\x20\x20\x20\x20\x8f\x83\x81CCC\x82\x83\x8f\x20\x20\x80\x80\x80\x80",
+      "000000fffcccfff000000",
+      "ffffffcccccccccffffff",
+    },
+    {
+      "\x20\x20\x20\x20\x87C\x80\x80\x20\x20\x20\x20\x80\x80\x82C\x8b\x20\x20\x20\x09",
+      "0000fc00000000ccf000f",
+      "ffffcccccccccccccffff",
+    },
+    {
+      "\x20\x20\x20\x81CC\x80\x20\x90\x80\x94\x20\x80\x80\x80CC\x82\x20\x20\x20",
+      "000fcc00c050000ccf000",
+      "fffccccc55ccccccccfff",
+    },
+    {
+      "\x20\x20\x85CCC\x80\x20\x20\x20\x20\x20\x20\x20\x20CCC\x8a\x20\x20",
+      "00fccc000000000cccf00",
+      "ffcccccccccccccccccff",
+    },
+    {
+      "\x20\x9fCCCC\x80\x81\x80\x83\x20\x20\x20\x85\x80CCCC\x90\x20",
+      "0fcccc0c0c000c0ccccc0",
+      "fcccccc555ccc55ccccff",
+    },
+    {
+      "\x20\x95CCCC\x95\x80\x80\x80\x20\x20\x20\x8f\x83CCCC\x95\x20",
+      "0fccccc00000055ccccc0",
+      "fccccc5555cccccccccff",
+    },
+    {
+      "\x20\x95CCCC\x82\x8f\x8f\x81\x20\x20\x20\x09\x09CCCC\x95\x20",
+      "0fcccc555500022ccccc0",
+      "fccccccccccccccccccff",
+    },
+    {
+      "\x20\x82CCCC\x80\x20\x20\x20\x20\x20\x20\x87\x83CCCC\x81\x20",
+      "0ccccc0000000ccccccc0",
+      "ffccccccccccc55ccccff",
+    },
+    {
+      "\x20\x20\x94CCC\x80\x8d\x80\x20\x20\x8f\x20\x83\x09CCC\x97\x20\x20",
+      "00fccc05000c052cccc00",
+      "ffccccccccc5ccccccfff",
+    },
+    {
+      "\x20\x20\x20\x90CC\x97\x81\x85\x80\x95\x80\x9f\x20\x20CC\x9f\x20\x20\x20",
+      "000fcccc50c0500ccc000",
+      "fffccc55cc55cccccffff",
+    },
+    {
+      "\x20\x20\x20\x20\x8bC\x80\x20\x20\x20\x20\x83\x20\x20CC\x87\x20\x20\x20\x20",
+      "0000cc00000500ccc0000",
+      "fffffcccccccccccfffff",
+    },
+    {
+      "\x20\x20\x20\x20\x20\x20\x83\x8f\x90CCC\x9f\x8f\x83\x20\x20\x20\x20\x20\x20",
+      "000000ccfcccccc000000",
+      "ffffffffccccfffffffff",
+    },
+  },
+  version = "1.0.0",
+  creator = "prototuipe",
+  width = 21,
+  height = 12,
+  animated = false,
+}

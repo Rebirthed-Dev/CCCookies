@@ -4,8 +4,6 @@ local db = require "restore"
 
 local handshake = false
 
-local PATH_TO_SERVER_ADDRESS = "/CCCookieClicker/serverAddress.txt"
-
 -- homeData, things displayed on home menu
 local data = {
     ["Cookies"] = 0,
@@ -26,8 +24,6 @@ local buildingData = {
 local upgradeData = {
 
 }
-
-local drive = peripheral.find("drive")
 
 local cookieString = " Cookies"
 
@@ -71,9 +67,10 @@ local defaultColors = {
 
 
 local currentArea = 1
-local scrollIndexBuildings = 1
-local scrollIndexUpgrades = 1
+local scrollBoxPositionBuildings = 1
+local scrollBoxPositionUpgrades = 1
 
+comms.format("genericUser")
 local mon = peripheral.find("monitor")
 
 -- 5x5 TEXT SCALE 1 MONITOR SIZE: 50x33
@@ -106,22 +103,10 @@ local protocol = comms.createProtocol(identity, "Cookie")
 
 local daemon = comms.getDaemon()
 
--- Define our server address function beforehand just so we can use it here
+-- The server's address.
+local server = "iCgiBsW4a6ElIi9WPZVKPZZyk_9nYb4kueZth_vKlSE="
 
-client.retrieveServerAddress = function()
-    local drivePath = drive.getMountPath()
-    local fullPath = drivePath .. PATH_TO_SERVER_ADDRESS
-
-    local serverFile = fs.open(fullPath, "r")
-
-    local address = serverFile.readLine()
-
-    serverFile.close()
-
-    return address
-end
-
-local serverConnection = comms.connectToServer(protocol, client.retrieveServerAddress())
+local serverConnection = comms.connectToServer(protocol, server)
 
 local shortnumberstring = function(number)
     if not client.getOption("USE_NOTATION") then
@@ -205,7 +190,6 @@ client.init = function()
         dbOptions[option] = true
     end
     client.checkForErlkingMode()
-    client.uiDrawConnecting()
 end
 
 client.checkForErlkingMode = function()
@@ -278,36 +262,28 @@ client.uiDrawHome = function()
         mon.setPaletteColor(colors.black, 17/255, 17/255, 17/255)
     else
         ui.drawImage(mon, 15, 10, "images/cookie.bimg", 1, true)
-        ui.clickRegion(mon, 15, 10, 20, 12, incrementCookies, "top")
+        ui.clickRegion(mon, 15, 10, 20, 12, incrementCookies, "monitor_0")
     end
 end
 
-client.scrollBoxHandlerBuildings = function(movement, allBuildings)
-    local newIndex = scrollIndexBuildings + movement
-
-    if newIndex <= 0 then
-        newIndex = 1
-    elseif newIndex > allBuildings - 1 then
-        newIndex = allBuildings - 1
+client.scrollBoxHandlerBuildings = function(scrollWindow, movementOperation, windowWidth, movement)
+    local newPosition = scrollBoxPositionBuildings + movement
+    if newPosition < 1 or newPosition > windowWidth then
+        -- do nothing
+    else
+        movementOperation(newPosition)
+        scrollBoxPositionBuildings = newPosition
     end
-
-    scrollIndexBuildings = newIndex
-
-    client.refreshDisplay()
 end
 
-client.scrollBoxHandlerUpgrades = function(movement, allUpgrades)
-    local newIndex = scrollIndexUpgrades + movement
-
-    if newIndex <= 0 then
-        newIndex = 1
-    elseif newIndex > allUpgrades - 1 then
-        newIndex = allUpgrades - 1
+client.scrollBoxHandlerUpgrades = function(scrollWindow, movementOperation, windowWidth, movement)
+    local newPosition = scrollBoxPositionUpgrades + movement
+    if newPosition < 1 or newPosition > windowWidth then
+        -- do nothing
+    else
+        movementOperation(newPosition)
+        scrollBoxPositionUpgrades = newPosition
     end
-
-    scrollIndexUpgrades = newIndex
-
-    client.refreshDisplay()
 end
 
 client.buyBuildingEntry = function(buildingName)
@@ -345,7 +321,7 @@ client.scrollBoxCreateBuildingEntry = function(win, index, buildingImage, buildi
     local purchaseText = "Buy 1x for " .. shortnumberstring(buildingCost) .. cookieString
     ui.label(win, 13, 10 + (index * 12), purchaseText, colors.white, colors.black)
 
-    ui.clickRegion(win, 2, 2+(index * 12), 47, 11, function() client.buyBuildingEntry(buildingName) end, "top")
+    ui.clickRegion(win, 2, 2+(index * 12), 47, 11, function() client.buyBuildingEntry(buildingName) end, "monitor_0")
 end
 
 client.scrollBoxCreateUpgradeEntry = function(win, index, upgradeImage, upgradeName, upgradeCost, func1, func2, desc1, desc2)
@@ -373,7 +349,7 @@ client.scrollBoxCreateUpgradeEntry = function(win, index, upgradeImage, upgradeN
     local purchaseText = "Purchase for " .. shortnumberstring(upgradeCost) .. cookieString
     ui.label(win, 13, 10 + (index * 12), purchaseText, colors.white, colors.black)
 
-    ui.clickRegion(win, 2, 2+(index * 12), 47, 11, function() client.buyUpgradeEntry(upgradeName) end, "top")
+    ui.clickRegion(win, 2, 2+(index * 12), 47, 11, function() client.buyUpgradeEntry(upgradeName) end, "monitor_0")
 end
 
 client.uiDrawBuildings = function ()
@@ -381,13 +357,10 @@ client.uiDrawBuildings = function ()
     -- BUILDINGS
     -- BUILDINGS
     ui.centerLabel(mon, 1, 1, monW, "Cookie Clicker")
-    mon.setPaletteColor(colors.pink, 132/255, 111/255, 89/255)
 
-    --local newWindow, scrollFunc = ui.scrollBox(mon, 1, 2, 50, 24, windowInnerHeight, true, true, colors.red, colors.black)
+    local windowInnerHeight = 100
 
-    -- select the two options we are using 
-    local build1 = buildingData[scrollIndexBuildings]
-    local build2 = buildingData[scrollIndexBuildings + 1]
+    local newWindow, scrollFunc = ui.scrollBox(mon, 1, 2, 50, 24, windowInnerHeight, true, true, colors.red, colors.black)
 
     ui.label(mon, 11, 27, "\\/ \\/")
     ui.label(mon, 35, 27, " /\\ /\\")
@@ -396,23 +369,19 @@ client.uiDrawBuildings = function ()
 
     ui.borderBox(mon, 28, 27, 21, 1)
 
-    --scrollFunc(scrollBoxPositionBuildings)
+    scrollFunc(scrollBoxPositionBuildings)
 
     -- clicking "down"
-    ui.clickRegion(mon, 2, 26, 21, 2, function() client.scrollBoxHandlerBuildings(1, #buildingData) end, "top")
+    ui.clickRegion(mon, 2, 26, 21, 2, function() client.scrollBoxHandlerBuildings(newWindow, scrollFunc, windowInnerHeight, 1) end, "monitor_0")
     
     -- clicking "up"
-    ui.clickRegion(mon, 28, 26, 21, 2, function() client.scrollBoxHandlerBuildings(-1, #buildingData)  end, "top")
+    ui.clickRegion(mon, 28, 26, 21, 2, function() client.scrollBoxHandlerBuildings(newWindow, scrollFunc, windowInnerHeight, -1)  end, "monitor_0")
 
-    if build1["Count"] == nil then
-        build1["Count"] = 0
+    for i, building in pairs(buildingData) do
+        client.scrollBoxCreateBuildingEntry(newWindow, tonumber(i), building["Image"], building["Name"], building["Count"], building["Cost"], shortnumberstring(building["CPS"]), building["Desc1"], building["Desc2"])
     end
-    client.scrollBoxCreateBuildingEntry(mon, 0, build1["Image"], build1["Name"], build1["Count"], build1["Cost"], shortnumberstring(build1["CPS"]), build1["Desc1"], build1["Desc2"])
 
-    if build2["Count"] == nil then
-        build2["Count"] = 0
-    end
-    client.scrollBoxCreateBuildingEntry(mon, 1, build2["Image"], build2["Name"], build2["Count"], build2["Cost"], shortnumberstring(build2["CPS"]), build2["Desc1"], build2["Desc2"])
+    --client.scrollBoxCreateBuildingEntry(newWindow, 2, "images/imagecursor.bimg", "Cursor", 40000, "400,000 Qd", "400,000 Qd", "A cursor to click more cookies.", "")
 end
 
 client.uiDrawUpgrades = function ()
@@ -420,15 +389,12 @@ client.uiDrawUpgrades = function ()
     -- UPGRADES
     -- UPGRADES
     ui.centerLabel(mon, 1, 1, monW, "Cookie Clicker")
-    mon.setPaletteColor(colors.pink, 132/255, 111/255, 89/255)
+
+    local windowInnerHeight = 100
+
+    local newWindow, scrollFunc = ui.scrollBox(mon, 1, 2, 50, 24, windowInnerHeight, true, true, colors.red, colors.black)
 
     --ui.centerLabel(newWindow, 4, 4, 40, "hello from window")
-    if scrollIndexUpgrades >= #upgradeData - 1 then
-        scrollIndexUpgrades = #upgradeData - 1
-    end
-
-    local up1 = upgradeData[scrollIndexUpgrades]
-    local up2 = upgradeData[scrollIndexUpgrades + 1]
 
     ui.label(mon, 11, 27, "\\/ \\/")
     ui.label(mon, 35, 27, " /\\ /\\")
@@ -437,16 +403,22 @@ client.uiDrawUpgrades = function ()
 
     ui.borderBox(mon, 28, 27, 21, 1)
 
+    -- the upgrades screen can change in size so reset the scroll just to make sure we're good, a QOL change would be improving this later
+    scrollBoxPositionUpgrades = 1
+
+    scrollFunc(scrollBoxPositionUpgrades)
+
     -- clicking "down"
-    ui.clickRegion(mon, 2, 26, 21, 2, function() client.scrollBoxHandlerUpgrades(1, #upgradeData) end, "top")
+    ui.clickRegion(mon, 2, 26, 21, 2, function() client.scrollBoxHandlerUpgrades(newWindow, scrollFunc, windowInnerHeight, 1) end, "monitor_0")
     
     -- clicking "up"
-    ui.clickRegion(mon, 28, 26, 21, 2, function() client.scrollBoxHandlerUpgrades(-1, #upgradeData)  end, "top")
+    ui.clickRegion(mon, 28, 26, 21, 2, function() client.scrollBoxHandlerUpgrades(newWindow, scrollFunc, windowInnerHeight, -1)  end, "monitor_0")
 
-    client.scrollBoxCreateUpgradeEntry(mon, 0, up1["Image"], up1["Name"], up1["Cost"], up1["Func1"], up1["Func2"], up1["Desc1"], up1["Desc2"])
-    
-    client.scrollBoxCreateUpgradeEntry(mon, 1, up2["Image"], up2["Name"], up2["Cost"], up2["Func1"], up2["Func2"], up2["Desc1"], up2["Desc2"])
+    --client.scrollBoxCreateUpgradeEntry(newWindow, 0, "images/imagecursor.bimg", "Premium Cursors", "400,000 Qd", "Doubles cursor efficiency.", "Also makes you really cool.", "Plates your cursors in solid platinum.", "...they can't lift themselves anymore.")
 
+    for i, upgrade in pairs(upgradeData) do
+        client.scrollBoxCreateUpgradeEntry(newWindow, tonumber(i), upgrade["Image"], upgrade["Name"], upgrade["Cost"], upgrade["Func1"], upgrade["Func2"], upgrade["Desc1"], upgrade["Desc2"])
+    end
 end
 
 client.uiDrawSettingsButton = function(y, settingName, stateName)
@@ -454,7 +426,7 @@ client.uiDrawSettingsButton = function(y, settingName, stateName)
 
     ui.borderBox(mon, 3, y, 46, 3, colorToUse)
     ui.label(mon, 4, y+1, settingName)
-    ui.clickRegion(mon, 3, y-1, 46, 5, function() client.toggleOption(stateName) client.refreshDisplay() end, "top")
+    ui.clickRegion(mon, 3, y-1, 46, 5, function() client.toggleOption(stateName) client.refreshDisplay() end, "monitor_0")
 end
 
 client.uiDrawSettings = function()
@@ -478,43 +450,34 @@ client.uiDrawBar = function()
     if currentArea == 2 then
         ui.borderBox(mon, 3, 30, 13, 3, colors.orange, colors.black)
         ui.label(mon, 5, 31, "Home", nil, nil)
-        ui.clickRegion(mon, 2, 29, 15, 5, function() client.changeArea(1) end, "top")
+        ui.clickRegion(mon, 2, 29, 15, 5, function() client.changeArea(1) end, "monitor_0")
     else
         ui.borderBox(mon, 3, 30, 13, 3, colors.white, colors.black)
         ui.label(mon, 5, 31, "Buildings", nil, nil)
-        ui.clickRegion(mon, 2, 29, 15, 5, function() client.changeArea(2) end, "top")
+        ui.clickRegion(mon, 2, 29, 15, 5, function() client.changeArea(2) end, "monitor_0")
     end
 
     -- Upgrades - Area 3
     if currentArea == 3 then
         ui.borderBox(mon, 19, 30, 14, 3, colors.orange, colors.black)
         ui.label(mon, 22, 31, "Home", nil, nil)
-        ui.clickRegion(mon, 18, 29, 16, 5, function() client.changeArea(1) end, "top")
+        ui.clickRegion(mon, 18, 29, 16, 5, function() client.changeArea(1) end, "monitor_0")
     else
         ui.borderBox(mon, 19, 30, 14, 3, colors.white, colors.black)
         ui.label(mon, 22, 31, "Upgrades", nil, nil)
-        ui.clickRegion(mon, 18, 29, 16, 5, function() client.changeArea(3) end, "top")
+        ui.clickRegion(mon, 18, 29, 16, 5, function() client.changeArea(3) end, "monitor_0")
     end
 
     -- Settings - Area 4
     if currentArea == 4 then
         ui.borderBox(mon, 36, 30, 13, 3, colors.orange, colors.black)
         ui.label(mon, 39, 31, "Home", nil, nil)
-        ui.clickRegion(mon, 35, 29, 15, 5, function() client.changeArea(1) end, "top")
+        ui.clickRegion(mon, 35, 29, 15, 5, function() client.changeArea(1) end, "monitor_0")
     else
         ui.borderBox(mon, 36, 30, 13, 3, colors.white, colors.black)
         ui.label(mon, 39, 31, "Options", nil, nil)
-        ui.clickRegion(mon, 35, 29, 15, 5, function() client.changeArea(4) end, "top")
+        ui.clickRegion(mon, 35, 29, 15, 5, function() client.changeArea(4) end, "monitor_0")
     end
-end
-
-client.uiDrawConnecting = function()
-    ui.centerLabel(mon, 1, 15, monW, "Connecting to Cookie Clicker server.")
-end
-
-client.uiDrawDisconnected = function ()
-    ui.centerLabel(mon, 1, 15, monW, "Failed to connect to server.")
-    ui.centerLabel(mon, 1, 16, monW, "It may be down. Try again.")
 end
 
 client.decodeServerMessage = function(message)
@@ -539,14 +502,14 @@ client.decodeServerMessage = function(message)
         elseif jsonMessage["Message"] == "buildings" then
             if jsonMessage["Data"] ~= nil then
                 for field, value in pairs(jsonMessage["Data"]) do
-                    buildingData[tonumber(field)+1] = value
+                    buildingData[field] = value
                 end
             end
         elseif jsonMessage["Message"] == "upgrades" then
             if jsonMessage["Data"] ~= nil then
                 upgradeData = {}
                 for field, value in pairs(jsonMessage["Data"]) do
-                    upgradeData[tonumber(field)+1] = value
+                    upgradeData[field] = value
                 end
             end
         end
@@ -591,20 +554,6 @@ end
 
 client.serverUpdatePingLoop = function()
     local lastUpdate = os.epoch("utc")
-    while not handshake do
-        os.sleep(0.1)
-        if handshake then
-            break
-        else
-            -- abort if we hit 10 seconds without a handshake
-            if os.epoch("utc") - lastUpdate > 10 then
-                -- this has taken too long, server is down. display error message and abort.
-                print("Server is not online.")
-                client.uiDrawDisconnected()
-                return
-            end 
-        end
-    end
     while true do
         if os.epoch("utc") - lastUpdate > 1000 then
             -- ask for update
@@ -616,6 +565,8 @@ client.serverUpdatePingLoop = function()
 end
 
 mon.setTextScale(1)
+
+client.refreshDisplay()
 
 client.init()
 
